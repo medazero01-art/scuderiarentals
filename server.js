@@ -18,6 +18,9 @@ app.use("/api/auth", authRoutes);
 app.use("/api/cars", carRoutes);
 app.use("/api/reservations", reservationRoutes);
 
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
 // DB Connection
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
