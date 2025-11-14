@@ -54,7 +54,7 @@ router.get("/my-reservations", authMiddleware, async (req, res) => {
       }
       }));
 
-    res.json(reservations);
+    res.json(SafeReservations);
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch reservations", error: err.message });
   }
