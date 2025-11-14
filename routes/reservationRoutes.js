@@ -37,30 +37,25 @@ router.post("/", authMiddleware, async (req, res) => {
   }
 });
 
-// récupérer les reservations des utilisateurs connectés
+// Récupérer les réservations de l'utilisateur connecté
 router.get("/my-reservations", authMiddleware, async (req, res) => {
   try {
     const reservations = await Reservation.find({ user: req.user.id })
       .populate("car")
       .sort({ createdAt: -1 });
 
-      const safeReservations = reservations.map(r => ({
-        ...r._doc,
-        car: r.car || {
-          name: "Deleted",
-          year: "-",
-          imageUrl: null,
-          pricePerDay: 0
-      }
-      }));
+    const safeReservations = reservations.map(r => ({
+      ...r._doc,
+      car: r.car || { name: "Deleted", year: "-", imageUrl: null, pricePerDay: 0 }
+    }));
 
-    res.json(SafeReservations);
+    res.json(safeReservations);
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch reservations", error: err.message });
   }
 });
 
-// admin recuperer toutes les reservations
+// Admin: récupérer toutes les réservations
 router.get("/", authMiddleware, async (req, res) => {
   if (req.user.role !== "admin") return res.status(403).json({ message: "Access denied" });
 
@@ -70,13 +65,19 @@ router.get("/", authMiddleware, async (req, res) => {
       .populate("user", "username email phoneNumber")
       .sort({ createdAt: -1 });
 
-    res.json(reservations);
+    const safeReservations = reservations.map(r => ({
+      ...r._doc,
+      car: r.car || { name: "Deleted", year: "-", imageUrl: null, pricePerDay: 0 },
+      user: r.user || { username: "Deleted", email: "-", phoneNumber: "-" }
+    }));
+
+    res.json(safeReservations);
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch all reservations", error: err.message });
   }
 });
 
-//admin change le status d'une reservation
+// Admin: changer le statut d'une réservation
 router.put("/:id/status", authMiddleware, async (req, res) => {
   if (req.user.role !== "admin") return res.status(403).json({ message: "Access denied" });
 
@@ -90,18 +91,24 @@ router.put("/:id/status", authMiddleware, async (req, res) => {
       { status },
       { new: true }
     )
-    .populate("car")
-    .populate("user", "username email phoneNumber");
+      .populate("car")
+      .populate("user", "username email phoneNumber");
 
     if (!reservation) return res.status(404).json({ message: "Reservation not found" });
 
-    res.json(reservation);
+    const safeReservation = {
+      ...reservation._doc,
+      car: reservation.car || { name: "Deleted", year: "-", imageUrl: null, pricePerDay: 0 },
+      user: reservation.user || { username: "Deleted", email: "-", phoneNumber: "-" }
+    };
+
+    res.json(safeReservation);
   } catch (err) {
     res.status(500).json({ message: "Failed to update reservation status", error: err.message });
   }
 });
 
-// recupere les dates de reservations pour le status approved
+// Récupérer les dates de réservation APPROUVÉES pour une voiture spécifique
 router.get("/car/:carId/approved", async (req, res) => {
   try {
     const reservations = await Reservation.find({ 
