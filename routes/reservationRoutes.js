@@ -87,7 +87,9 @@ router.put("/:id/status", authMiddleware, async (req, res) => {
       req.params.id,
       { status },
       { new: true }
-    ).populate("car");
+    )
+    .populate("car")
+    .populate("user", "username email phoneNumber");
 
     if (!reservation) return res.status(404).json({ message: "Reservation not found" });
 
