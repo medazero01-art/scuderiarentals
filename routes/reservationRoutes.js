@@ -44,6 +44,16 @@ router.get("/my-reservations", authMiddleware, async (req, res) => {
       .populate("car")
       .sort({ createdAt: -1 });
 
+      const safeReservations = reservations.map(r => ({
+        ...r._doc,
+        car: r.car || {
+          name: "Deleted",
+          year: "-",
+          imageUrl: null,
+          pricePerDay: 0
+      }
+      }));
+
     res.json(reservations);
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch reservations", error: err.message });
