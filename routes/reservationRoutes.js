@@ -6,9 +6,7 @@ import authMiddleware from "../Middleware/authMiddleware.js";
 
 const router = express.Router();
 
-/**
- * 1. POST: Créer une nouvelle réservation (UTILISATEUR)
- */
+// Créer une nouvelle réservation
 router.post("/", authMiddleware, async (req, res) => {
   try {
     const { carId, startDate, endDate } = req.body;
@@ -39,9 +37,7 @@ router.post("/", authMiddleware, async (req, res) => {
   }
 });
 
-/**
- * 2. GET: Récupérer les réservations de l'utilisateur connecté
- */
+// récupérer les reservations des utilisateurs connectés
 router.get("/my-reservations", authMiddleware, async (req, res) => {
   try {
     const reservations = await Reservation.find({ user: req.user.id })
@@ -54,9 +50,7 @@ router.get("/my-reservations", authMiddleware, async (req, res) => {
   }
 });
 
-/**
- * 3. GET: Récupérer toutes les réservations (ADMIN)
- */
+// admin recuperer toutes les reservations
 router.get("/", authMiddleware, async (req, res) => {
   if (req.user.role !== "admin") return res.status(403).json({ message: "Access denied" });
 
@@ -72,9 +66,7 @@ router.get("/", authMiddleware, async (req, res) => {
   }
 });
 
-/**
- * 4. PUT: Changer le statut d'une réservation (ADMIN)
- */
+//admin change le status d'une reservation
 router.put("/:id/status", authMiddleware, async (req, res) => {
   if (req.user.role !== "admin") return res.status(403).json({ message: "Access denied" });
 
@@ -99,9 +91,7 @@ router.put("/:id/status", authMiddleware, async (req, res) => {
   }
 });
 
-/**
- * 5. GET: Récupérer les dates de réservation APPROUVÉES pour une voiture spécifique
- */
+// recupere les dates de reservations pour le status approved
 router.get("/car/:carId/approved", async (req, res) => {
   try {
     const reservations = await Reservation.find({ 
